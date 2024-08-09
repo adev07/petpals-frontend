@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
 import assets from "../../assets/images/assets.png";
 import Card from "../../components/Card/Card";
-import Dog from "../../assets/images/dog.png";
 import { getAllPets } from "../../ApiService/ApiService";
-import { FaChevronLeft, FaChevronRight, FaPlus, FaPaw } from 'react-icons/fa';
+import { FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import Loader from "../../components/Loader/Loader"; // Import the Loader component
 
 function PetPage() {
   const [allPets, setAllPets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(true); // State to handle loading
   const petsPerPage = 6;
 
   const renderPets = async (page) => {
+    setLoading(true); // Set loading to true when fetching data
     try {
       const offset = (page - 1) * petsPerPage;
       const response = await getAllPets({
@@ -22,18 +24,19 @@ function PetPage() {
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false); // Set loading to false after data is fetched
     }
   };
 
   useEffect(() => {
     renderPets(currentPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Scroll to the top of the page
   }, [currentPage]);
 
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
-
-
 
   return (
     <div className="overflow-hidden">
@@ -56,9 +59,11 @@ function PetPage() {
         </div>
       </div>
       <div className="flex items-center justify-center">
-        <div className="grid sm:grid-cols-3 sm:gap-[54px] gap-[42px] sm:mt-[120px] mt-[70px]">
-          {allPets.map((pet, index) => (
-            <>
+        {loading ? (
+          <Loader /> 
+        ) : (
+          <div className="grid sm:grid-cols-3 sm:gap-[54px] gap-[42px] sm:mt-[120px] mt-[70px]">
+            {allPets.map((pet, index) => (
               <Card
                 key={index}
                 name={pet.name}
@@ -68,9 +73,9 @@ function PetPage() {
                 bgColor="bg-gray-100"
                 temperament={pet.temperament}
               />
-            </>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
       <div className="mt-[42px] sm:mb-[120px] mb-[60px] flex justify-center items-center space-x-4">
         <button

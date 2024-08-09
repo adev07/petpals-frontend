@@ -6,13 +6,14 @@ import {
   updatePet,
   deletePet,
   getAllPets,
-} from "../../ApiService/ApiService"; // Adjust the import path as needed
+} from "../../ApiService/ApiService";
 import { ADMIN } from "../../Constants";
 import { FaChevronLeft, FaChevronRight, FaPlus, FaPaw } from "react-icons/fa";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Loader from "../../components/Loader/Loader";
 
 const Admin = () => {
   const navigate = useNavigate();
@@ -33,6 +34,8 @@ const Admin = () => {
   const [allPets, setAllPets] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [loading, setLoading] = useState(false);
+
   const petsPerPage = 6;
 
   const handleChange = (e) => {
@@ -48,17 +51,19 @@ const Admin = () => {
   }, []);
 
   const renderPets = async (page) => {
+    setLoading(true);
     try {
       const offset = (page - 1) * petsPerPage;
       const response = await getAllPets({
         limit: petsPerPage,
         offset: offset,
       });
-      console.log(response.data);
       setAllPets(response.data.pets);
       setTotalPages(response.data.totalPages);
     } catch (error) {
       console.log(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -159,6 +164,9 @@ const Admin = () => {
     setCurrentPage(newPage);
   };
 
+  
+  
+
   return (
     <div className="sm:p-4 min-h-screen flex flex-col items-center bg-[#FFF4E3] sm:pb-[120px] pb-[60px]">
       <ToastContainer />
@@ -198,15 +206,19 @@ const Admin = () => {
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                   required
                 />
-                <input
-                  type="text"
+                <select
                   name="gender"
                   value={form.gender}
                   onChange={handleChange}
-                  placeholder="Gender"
                   className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
                   required
-                />
+                >
+                  <option value="" disabled>
+                    Select Gender
+                  </option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                </select>
                 <input
                   type="file"
                   onChange={handleFileChange}
@@ -235,7 +247,9 @@ const Admin = () => {
         </Modal>
       )}
 
-      {allPets.length > 0 ? (
+      {loading ? (
+        <Loader />
+      ) : allPets.length > 0 ? (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 sm:gap-[54px] gap-[42px]">
             {allPets.map((pet, index) => (

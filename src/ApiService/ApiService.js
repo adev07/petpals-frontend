@@ -74,14 +74,11 @@ export const deletePet = async (petId) => {
   }
 };
 
-// function to fetch all the pets
-export const getAllPets = async (data) =>{
-  try{
-    const response = await api.post('/pet/all',data,{
-      withCredentials:true
-    });
-    return response.data
-  }catch (error) {
+export const getAllPets = async (data) => {
+  try {
+    const response = await api.post('/pet/all', data);
+    return response.data;
+  } catch (error) {
     throw error.response ? error.response.data : new Error("Network error");
   }
-}
+};
